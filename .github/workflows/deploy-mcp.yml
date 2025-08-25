@@ -59,6 +59,32 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+    # Create App Runner service role
+    - name: Create App Runner service role
+      run: |
+        echo "Creating App Runner service role..."
+        aws iam create-role \
+          --role-name AppRunnerECRAccessRole \
+          --assume-role-policy-document '{
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "build.apprunner.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          }' || echo "Role already exists, continuing..."
+
+        aws iam attach-role-policy \
+          --role-name AppRunnerECRAccessRole \
+          --policy-arn arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess || echo "Policy already attached, continuing..."
+
+        echo "Waiting for role to be ready..."
+        sleep 10
+
     # Deploy to AWS App Runner (if service exists) or create new service
     - name: Deploy to AWS App Runner
       env:
@@ -68,7 +94,7 @@ jobs:
       run: |
         # Check if App Runner service exists
         SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='openautomate-mcp-service'].ServiceArn" --output text --region ap-southeast-1)
-        
+
         if [ -z "$SERVICE_ARN" ]; then
           echo "Creating new App Runner service..."
           aws apprunner create-service \
@@ -82,7 +108,8 @@ jobs:
                     "OPENAUTOMATE_API_BASE_URL": "https://api.openautomate.io"
                   }
                 },
-                "ImageRepositoryType": "ECR"
+                "ImageRepositoryType": "ECR",
+                "AccessRoleArn": "arn:aws:iam::961341552373:role/AppRunnerECRAccessRole"
               },
               "AutoDeploymentsEnabled": true
             }' \
