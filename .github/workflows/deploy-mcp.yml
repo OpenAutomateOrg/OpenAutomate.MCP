@@ -107,7 +107,9 @@ jobs:
                   "RuntimeEnvironmentVariables": {
                     "OPENAUTOMATE_API_BASE_URL": "https://api.openautomate.io",
                     "PORT": "8000",
-                    "HOST": "0.0.0.0"
+                    "HOST": "0.0.0.0",
+                    "UVICORN_HOST": "0.0.0.0",
+                    "UVICORN_PORT": "8000"
                   }
                 },
                 "ImageRepositoryType": "ECR"

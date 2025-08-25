@@ -3,6 +3,7 @@ import requests
 import json
 import os
 from typing import Optional
+import uvicorn
 
 # Configuration - Environment variables with fallback defaults
 # Normalize to avoid stray whitespace causing malformed URLs (e.g., host%20)
@@ -401,11 +402,23 @@ def start_an_execution(package_name: str, jwt_token: str,
 if __name__ == "__main__":
     print("Starting OpenAutomate MCP Server...")
     print(f"API Base URL: {OPENAUTOMATE_API_BASE_URL}")
+    print(f"Server will start on {HOST}:{PORT}")
 
-    # Set environment variables for FastMCP
-    os.environ["PORT"] = str(PORT)
-    os.environ["HOST"] = HOST
-
-    # Start MCP server with SSE transport
-    # FastMCP will read PORT and HOST from environment
-    mcp.run(transport='sse')
+    # Try to get the FastAPI app from FastMCP and run it with uvicorn
+    try:
+        # Check if FastMCP has an app attribute
+        if hasattr(mcp, 'app'):
+            print("Using uvicorn to run FastMCP app directly...")
+            uvicorn.run(mcp.app, host=HOST, port=PORT)
+        else:
+            print("Using FastMCP run method...")
+            # Set environment variables that FastMCP might use
+            os.environ["PORT"] = str(PORT)
+            os.environ["HOST"] = HOST
+            os.environ["UVICORN_HOST"] = HOST
+            os.environ["UVICORN_PORT"] = str(PORT)
+            mcp.run(transport='sse')
+    except Exception as e:
+        print(f"Error starting server: {e}")
+        # Fallback to default FastMCP run
+        mcp.run(transport='sse')
