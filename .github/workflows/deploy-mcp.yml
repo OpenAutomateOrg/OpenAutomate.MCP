@@ -108,9 +108,9 @@ jobs:
                     "OPENAUTOMATE_API_BASE_URL": "https://api.openautomate.io"
                   }
                 },
-                "ImageRepositoryType": "ECR",
-                "AccessRoleArn": "arn:aws:iam::961341552373:role/AppRunnerECRAccessRole"
+                "ImageRepositoryType": "ECR"
               },
+              "AccessRoleArn": "arn:aws:iam::961341552373:role/AppRunnerECRAccessRole",
               "AutoDeploymentsEnabled": true
             }' \
             --instance-configuration '{
