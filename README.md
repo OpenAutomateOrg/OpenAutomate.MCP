@@ -104,4 +104,4 @@ Start an execution by auto-selecting an available bot agent or by agent name.
 python mcp_server.py
 ```
 
-The server will start and listen for MCP connections using Server-Sent Events (SSE) transport. 
+The server will start and listen for MCP connections using Server-Sent Events (SSE) transport..
