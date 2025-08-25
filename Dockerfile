@@ -20,12 +20,12 @@ COPY mcp_server.py .
 RUN useradd -m -u 1000 mcpuser && chown -R mcpuser:mcpuser /app
 USER mcpuser
 
-# Expose MCP server port and health check port
-EXPOSE 8000 8080
+# Expose MCP server port
+EXPOSE 8000
 
-# Health check
+# Health check - FastMCP provides built-in endpoints
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:8000/ || exit 1
 
 # Start the MCP server
 CMD ["python", "mcp_server.py"]

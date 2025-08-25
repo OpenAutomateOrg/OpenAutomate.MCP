@@ -105,7 +105,9 @@ jobs:
                 "ImageConfiguration": {
                   "Port": "8000",
                   "RuntimeEnvironmentVariables": {
-                    "OPENAUTOMATE_API_BASE_URL": "https://api.openautomate.io"
+                    "OPENAUTOMATE_API_BASE_URL": "https://api.openautomate.io",
+                    "PORT": "8000",
+                    "HOST": "0.0.0.0"
                   }
                 },
                 "ImageRepositoryType": "ECR"
@@ -121,8 +123,7 @@ jobs:
             }' \
             --health-check-configuration '{
               "Protocol": "HTTP",
-              "Path": "/health",
-              "Port": "8080",
+              "Path": "/",
               "Interval": 10,
               "Timeout": 5,
               "HealthyThreshold": 1,
