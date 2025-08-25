@@ -122,6 +122,7 @@ jobs:
             --health-check-configuration '{
               "Protocol": "HTTP",
               "Path": "/health",
+              "Port": "8080",
               "Interval": 10,
               "Timeout": 5,
               "HealthyThreshold": 1,

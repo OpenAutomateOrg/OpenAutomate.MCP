@@ -417,15 +417,15 @@ class HealthHandler(BaseHTTPRequestHandler):
         return
 
 def start_health_server():
-    """Start health check server on port 8000"""
-    server = HTTPServer(('0.0.0.0', 8000), HealthHandler)
+    """Start health check server on port 8080"""
+    server = HTTPServer(('0.0.0.0', 8080), HealthHandler)
     server.serve_forever()
 
 if __name__ == "__main__":
     # Start health check server in background thread
     health_thread = threading.Thread(target=start_health_server, daemon=True)
     health_thread.start()
-    print("Health check server started on port 8000")
+    print("Health check server started on port 8080")
 
-    # Start MCP server
-    mcp.run(transport='sse')
+    # Start MCP server on port 8000
+    mcp.run(transport='sse', port=8000)
