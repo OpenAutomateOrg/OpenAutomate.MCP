@@ -3,7 +3,8 @@ import requests
 import json
 import os
 from typing import Optional
-from fastapi.responses import JSONResponse
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # Configuration - Environment variables with fallback defaults
 # Normalize to avoid stray whitespace causing malformed URLs (e.g., host%20)
@@ -393,6 +394,38 @@ def start_an_execution(package_name: str, jwt_token: str,
             "details": str(e)
         }, indent=2)
 
+# Simple health check server for AWS App Runner
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/health':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = {
+                "status": "healthy",
+                "service": "OpenAutomate MCP Server",
+                "api_url": OPENAUTOMATE_API_BASE_URL,
+                "transport": "sse"
+            }
+            self.wfile.write(json.dumps(response).encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def log_message(self, format, *args):
+        # Suppress default logging to avoid noise
+        return
+
+def start_health_server():
+    """Start health check server on port 8000"""
+    server = HTTPServer(('0.0.0.0', 8000), HealthHandler)
+    server.serve_forever()
 
 if __name__ == "__main__":
+    # Start health check server in background thread
+    health_thread = threading.Thread(target=start_health_server, daemon=True)
+    health_thread.start()
+    print("Health check server started on port 8000")
+
+    # Start MCP server
     mcp.run(transport='sse')
