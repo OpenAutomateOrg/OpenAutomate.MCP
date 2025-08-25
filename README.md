@@ -44,19 +44,19 @@ Set the environment variable to point to your production API:
 
 **Linux/macOS:**
 ```bash
-export OPENAUTOMATE_API_BASE_URL=https://api.openautomate.com
+export OPENAUTOMATE_API_BASE_URL=https://api.openautomate.io
 python mcp_server.py
 ```
 
 **Windows:**
 ```cmd
-set OPENAUTOMATE_API_BASE_URL=https://api.openautomate.com
+set OPENAUTOMATE_API_BASE_URL=https://api.openautomate.io
 python mcp_server.py
 ```
 
 **Docker:**
 ```bash
-docker run -e OPENAUTOMATE_API_BASE_URL=https://api.openautomate.com your-mcp-server
+docker run -e OPENAUTOMATE_API_BASE_URL=https://api.openautomate.io your-mcp-server
 ```
 
 **Docker Compose:**
@@ -65,7 +65,7 @@ services:
   mcp-server:
     build: .
     environment:
-      - OPENAUTOMATE_API_BASE_URL=https://api.openautomate.com
+      - OPENAUTOMATE_API_BASE_URL=https://api.openautomate.io
     ports:
       - "8000:8000"
 ```

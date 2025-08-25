@@ -1,0 +1,50 @@
+# n8n workflow files
+OpenAutomate_AI_Assistant_v2.json
+
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Development files
+.git/
+.gitignore
+README.md
+*.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Development scripts
+run_mcp_server.bat
+run_mcp_server.sh
+run_mcp_server_dev.bat
+setup-apprunner.sh
+
+# CI/CD files
+.github/
+apprunner.yaml
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Test files
+test_*
+*_test.py
+tests/

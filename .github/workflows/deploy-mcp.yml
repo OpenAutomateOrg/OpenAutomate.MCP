@@ -1,0 +1,125 @@
+name: Deploy MCP Server to AWS App Runner
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'OpenAutomate.MCP/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  deploy-mcp:
+    name: Build and Deploy MCP Server
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    # Checkout repository
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Setup Python
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    # Configure AWS credentials using OIDC
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::961341552373:role/GithubAction
+        aws-region: ap-southeast-1
+
+    # Login to Amazon ECR
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    # Create ECR repository if it doesn't exist
+    - name: Create ECR repository
+      run: |
+        aws ecr describe-repositories --repository-names openautomate-mcp --region ap-southeast-1 || \
+        aws ecr create-repository --repository-name openautomate-mcp --region ap-southeast-1
+
+    # Build, tag, and push image to Amazon ECR
+    - name: Build, tag, and push MCP image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: openautomate-mcp
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        cd OpenAutomate.MCP
+        # Build a docker container and push it to ECR
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    # Deploy to AWS App Runner (if service exists) or create new service
+    - name: Deploy to AWS App Runner
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: openautomate-mcp
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Check if App Runner service exists
+        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='openautomate-mcp-service'].ServiceArn" --output text --region ap-southeast-1)
+        
+        if [ -z "$SERVICE_ARN" ]; then
+          echo "Creating new App Runner service..."
+          aws apprunner create-service \
+            --service-name openautomate-mcp-service \
+            --source-configuration '{
+              "ImageRepository": {
+                "ImageIdentifier": "'$ECR_REGISTRY'/'$ECR_REPOSITORY':latest",
+                "ImageConfiguration": {
+                  "Port": "8000",
+                  "RuntimeEnvironmentVariables": {
+                    "OPENAUTOMATE_API_BASE_URL": "https://api.openautomate.io"
+                  }
+                },
+                "ImageRepositoryType": "ECR"
+              },
+              "AutoDeploymentsEnabled": true
+            }' \
+            --instance-configuration '{
+              "Cpu": "0.25 vCPU",
+              "Memory": "0.5 GB"
+            }' \
+            --health-check-configuration '{
+              "Protocol": "HTTP",
+              "Path": "/health",
+              "Interval": 10,
+              "Timeout": 5,
+              "HealthyThreshold": 1,
+              "UnhealthyThreshold": 5
+            }' \
+            --region ap-southeast-1
+        else
+          echo "Updating existing App Runner service..."
+          aws apprunner start-deployment \
+            --service-arn $SERVICE_ARN \
+            --region ap-southeast-1
+        fi
+
+    # Wait for deployment to complete
+    - name: Wait for deployment
+      run: |
+        echo "Waiting for App Runner deployment to complete..."
+        sleep 60
+        
+        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='openautomate-mcp-service'].ServiceArn" --output text --region ap-southeast-1)
+        
+        if [ ! -z "$SERVICE_ARN" ]; then
+          SERVICE_URL=$(aws apprunner describe-service --service-arn $SERVICE_ARN --query "Service.ServiceUrl" --output text --region ap-southeast-1)
+          echo "MCP Server deployed successfully!"
+          echo "Service URL: https://$SERVICE_URL"
+          echo "Health Check: https://$SERVICE_URL/health"
+        fi

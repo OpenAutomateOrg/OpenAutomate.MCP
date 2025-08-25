@@ -1,0 +1,20 @@
+version: 1.0
+runtime: docker
+build:
+  commands:
+    build:
+      - echo "Build started on `date`"
+      - echo "Building the Docker image..."
+      - docker build -t openautomate-mcp .
+      - echo "Build completed on `date`"
+run:
+  runtime-version: latest
+  command: python mcp_server.py
+  network:
+    port: 8000
+    env: PORT
+  env:
+    - name: PORT
+      value: "8000"
+    - name: OPENAUTOMATE_API_BASE_URL
+      value: "https://api.openautomate.io"

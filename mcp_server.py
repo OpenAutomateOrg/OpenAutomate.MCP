@@ -3,6 +3,7 @@ import requests
 import json
 import os
 from typing import Optional
+from fastapi.responses import JSONResponse
 
 # Configuration - Environment variables with fallback defaults
 # Normalize to avoid stray whitespace causing malformed URLs (e.g., host%20)
@@ -392,6 +393,20 @@ def start_an_execution(package_name: str, jwt_token: str,
             "details": str(e)
         }, indent=2)
 
+
+# Add health check endpoint for AWS App Runner
+@mcp.app.get("/health")
+async def health_check():
+    """Health check endpoint for AWS App Runner"""
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "healthy",
+            "service": "OpenAutomate MCP Server",
+            "api_url": OPENAUTOMATE_API_BASE_URL,
+            "transport": "sse"
+        }
+    )
 
 if __name__ == "__main__":
     mcp.run(transport='sse')
