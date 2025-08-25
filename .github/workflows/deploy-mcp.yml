@@ -110,7 +110,9 @@ jobs:
                 },
                 "ImageRepositoryType": "ECR"
               },
-              "AccessRoleArn": "arn:aws:iam::961341552373:role/AppRunnerECRAccessRole",
+              "AuthenticationConfiguration": {
+                "AccessRoleArn": "arn:aws:iam::961341552373:role/AppRunnerECRAccessRole"
+              },
               "AutoDeploymentsEnabled": true
             }' \
             --instance-configuration '{
