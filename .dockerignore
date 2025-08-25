@@ -31,6 +31,9 @@ run_mcp_server.sh
 run_mcp_server_dev.bat
 setup-apprunner.sh
 
+# Keep production startup script
+!start_server.py
+
 # CI/CD files
 .github/
 apprunner.yaml

@@ -125,7 +125,7 @@ jobs:
             }' \
             --health-check-configuration '{
               "Protocol": "HTTP",
-              "Path": "/",
+              "Path": "/sse",
               "Interval": 10,
               "Timeout": 5,
               "HealthyThreshold": 1,

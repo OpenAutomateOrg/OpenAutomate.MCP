@@ -61,7 +61,7 @@ echo
 echo "Starting MCP Server in Production Mode..."
 echo "Press Ctrl+C to stop the server"
 echo
-$PYTHON_CMD mcp_server.py
+$PYTHON_CMD start_server.py
 
 # If we get here, the server stopped
 echo
