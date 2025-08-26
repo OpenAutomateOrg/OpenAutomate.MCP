@@ -44,7 +44,7 @@ REM Start the MCP server
 echo Starting MCP Server...
 echo Press Ctrl+C to stop the server
 echo.
-python mcp_server.py
+python start_server.py
 
 REM If we get here, the server stopped
 echo.
