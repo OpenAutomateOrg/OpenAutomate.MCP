@@ -120,8 +120,8 @@ jobs:
               "AutoDeploymentsEnabled": true
             }' \
             --instance-configuration '{
-              "Cpu": "0.25 vCPU",
-              "Memory": "0.5 GB"
+              "Cpu": "1 vCPU",
+              "Memory": "2 GB"
             }' \
             --health-check-configuration '{
               "Protocol": "HTTP",
@@ -177,8 +177,8 @@ jobs:
                   "AutoDeploymentsEnabled": true
                 }' \
                 --instance-configuration '{
-                  "Cpu": "0.25 vCPU",
-                  "Memory": "0.5 GB"
+                  "Cpu": "1 vCPU",
+                  "Memory": "2 GB"
                 }' \
                 --health-check-configuration '{
                   "Protocol": "HTTP",
