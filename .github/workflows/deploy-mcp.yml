@@ -190,7 +190,7 @@ jobs:
                 }' \
                 --region ap-southeast-1
               ;;
-            "CREATING"|"UPDATING"|"DELETING"|"PAUSED")
+            "CREATING"|"UPDATING"|"DELETING"|"PAUSED"|"OPERATION_IN_PROGRESS")
               echo "⏳ Service is in transitional state ($SERVICE_STATUS). Waiting..."
 
               # Wait for service to reach a stable state (max 5 minutes)
